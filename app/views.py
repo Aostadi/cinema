@@ -1,7 +1,7 @@
 from http.client import HTTPResponse
 
 from django.conf.global_settings import LOGIN_REDIRECT_URL
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Count
 from django.http import HttpResponseRedirect, JsonResponse
@@ -38,6 +38,7 @@ def reserve_seat(request, movie_id, seat_id):
         return HttpResponseRedirect(f'/movie/{movie_id}/seats')
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def stats(request):
     seats = Seat.objects.filter(ticket__seat__isnull=False).values('number').annotate(total=Count('ticket__seat'))
     response = list()
