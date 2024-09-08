@@ -39,8 +39,10 @@ def reserve_seat(request, movie_id, seat_id):
         return HttpResponseRedirect(f'/movie/{movie_id}/seats')
 
 
-@user_passes_test(lambda u: u.is_superuser)
 def stats(request):
+    from django.http import HttpResponseForbidden
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
     seats = Seat.objects.filter(ticket__seat__isnull=False).values('number').annotate(total=Count('ticket__seat'))
     response = list()
     for seat in seats:
