@@ -1,6 +1,7 @@
 from http.client import HTTPResponse
 
 from django.conf.global_settings import LOGIN_REDIRECT_URL
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Count
@@ -50,9 +51,13 @@ def stats(request):
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('list_movies')
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect("list_movies")
     else:
         form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
